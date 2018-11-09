@@ -1,0 +1,11 @@
+###> OS/IDE
+/.idea/
+.DS_Store
+###< OS/IDE
+
+###> symfony/framework-bundle ###
+/.env
+/public/bundles/
+/var/
+/vendor/
+###< symfony/framework-bundle ###

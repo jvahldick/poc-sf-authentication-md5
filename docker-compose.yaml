@@ -1,0 +1,66 @@
+version: "3.7"
+
+networks:
+    sf-poc:
+        driver: bridge
+
+services:
+
+    #######################################
+    # PHP: Auth Application
+    #######################################
+    php-fpm:
+        build:
+            context: .
+            dockerfile: docker/php-fpm/Dockerfile
+        ports:
+            - 9016:9000
+        volumes:
+            - ./app:/var/www/app:rw,cached
+        networks:
+            - sf-poc
+
+    #######################################
+    # Nginx: Used by the Auth Application
+    #######################################
+    nginx:
+        build:
+            context: .
+            dockerfile: docker/nginx/Dockerfile
+            args:
+                - PHP_UPSTREAM_CONTAINER=php-fpm
+                - PHP_UPSTREAM_PORT=9000
+        volumes:
+            - ./app/public:/var/www/app/public
+        ports:
+            - "8082:80"
+        depends_on:
+            - php-fpm
+        networks:
+            - sf-poc
+        command:
+            - /bin/sh
+            - -c
+            - |
+                chown -R www-data:www-data /var/www/app
+                nginx
+
+    #######################################
+    # MariaDB: Auth database
+    #######################################
+    maria_db:
+        build:
+            context: .
+            dockerfile: ./docker/mariadb/Dockerfile
+        environment:
+            - MYSQL_USER=admin
+            - MYSQL_PASSWORD=admin
+            - MYSQL_ROOT_PASSWORD=root
+            - MYSQL_DATABASE=authentication
+        volumes:
+            - ./data-storage/mysql-data:/var/lib/mysql:rw
+        restart: always
+        ports:
+            - "3340:3306"
+        networks:
+            - sf-poc

@@ -1,0 +1,9 @@
+index:
+    path: /admin
+    controller: App\Controller\Admin\DashboardController::index
+    methods: [GET]
+
+authenticate:
+    path: /authenticate
+    controller: App\Controller\Security\AuthenticationController::authenticate
+    methods: [POST]
